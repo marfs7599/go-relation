@@ -19,7 +19,7 @@ func GetAllPatient(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		var patient []entity.Patient
 
-		config.DB.Preload("Bpjs").Find(&patient)
+		config.DB.Preload("Bpjs").Preload("Recipe").Find(&patient)
 
 		result := Result{Code: 200, Data: patient, Message: "Success collect data patient!"}
 		jsonData, err := json.Marshal(result)
@@ -66,7 +66,7 @@ func GetAllBpjs(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		var bpjs []entity.Bpjs
 
-		config.DB.Find(&bpjs)
+		config.DB.Preload("Patient").Find(&bpjs)
 
 		result := Result{Code: 200, Data: bpjs, Message: "Success collect data bpjs!"}
 		jsonData, err := json.Marshal(result)
@@ -95,6 +95,53 @@ func InsertBpjs(w http.ResponseWriter, r *http.Request) {
 		config.DB.Create(&bpjs)
 
 		result := Result{Code: 200, Data: bpjs, Message: "Success insert data bpjs!"}
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
+	}
+	http.Error(w, "Method not valid!", http.StatusInternalServerError)
+}
+
+func GetAllRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == "GET" {
+		var recipe []entity.Recipe
+
+		config.DB.Preload("Patient").Find(&recipe)
+
+		result := Result{Code: 200, Data: recipe, Message: "Success collect data recipe!"}
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
+	}
+	http.Error(w, "Method not valid!", http.StatusInternalServerError)
+}
+
+func InsertRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == "POST" {
+		var recipe entity.Recipe
+		err := json.NewDecoder(r.Body).Decode(&recipe)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		config.DB.Create(&recipe)
+
+		result := Result{Code: 200, Data: recipe, Message: "Success insert data recipe!"}
 		jsonData, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

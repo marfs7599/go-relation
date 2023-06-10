@@ -19,6 +19,8 @@ func main() {
 	r.HandleFunc("/patients", moduls.InsertPatient).Methods("POST")
 	r.HandleFunc("/bpjs", moduls.GetAllBpjs).Methods("GET")
 	r.HandleFunc("/bpjs", moduls.InsertBpjs).Methods("POST")
+	r.HandleFunc("/recipes", moduls.GetAllRecipe).Methods("GET")
+	r.HandleFunc("/recipes", moduls.InsertRecipe).Methods("POST")
 
 	fmt.Println("server start at localhost:9000")
 	http.ListenAndServe(":9000", r)

@@ -24,6 +24,7 @@ func Migration() {
 	err := DB.AutoMigrate(
 		&entity.Patient{},
 		&entity.Bpjs{},
+		&entity.Recipe{},
 	)
 
 	if err != nil {
