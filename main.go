@@ -17,6 +17,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/patients", moduls.GetAllPatient).Methods("GET")
 	r.HandleFunc("/patients", moduls.InsertPatient).Methods("POST")
+	r.HandleFunc("/bpjs", moduls.GetAllBpjs).Methods("GET")
+	r.HandleFunc("/bpjs", moduls.InsertBpjs).Methods("POST")
 
 	fmt.Println("server start at localhost:9000")
 	http.ListenAndServe(":9000", r)
