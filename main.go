@@ -21,6 +21,8 @@ func main() {
 	r.HandleFunc("/bpjs", moduls.InsertBpjs).Methods("POST")
 	r.HandleFunc("/recipes", moduls.GetAllRecipe).Methods("GET")
 	r.HandleFunc("/recipes", moduls.InsertRecipe).Methods("POST")
+	r.HandleFunc("/tags", moduls.GetAllTag).Methods("GET")
+	r.HandleFunc("/tags", moduls.InsertTag).Methods("POST")
 
 	fmt.Println("server start at localhost:9000")
 	http.ListenAndServe(":9000", r)

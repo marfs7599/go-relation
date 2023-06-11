@@ -17,11 +17,11 @@ type Result struct {
 func GetAllPatient(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "GET" {
-		var patient []entity.Patient
+		var patients []entity.Patient
 
-		config.DB.Preload("Bpjs").Preload("Recipe").Find(&patient)
+		config.DB.Preload("Bpjs").Preload("Recipe").Find(&patients)
 
-		result := Result{Code: 200, Data: patient, Message: "Success collect data patient!"}
+		result := Result{Code: 200, Data: patients, Message: "Success collect data patients!"}
 		jsonData, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -111,11 +111,11 @@ func InsertBpjs(w http.ResponseWriter, r *http.Request) {
 func GetAllRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "GET" {
-		var recipe []entity.Recipe
+		var recipes []entity.RecipeResponseTag
 
-		config.DB.Preload("Patient").Find(&recipe)
+		config.DB.Preload("Patient").Preload("Tags").Find(&recipes)
 
-		result := Result{Code: 200, Data: recipe, Message: "Success collect data recipe!"}
+		result := Result{Code: 200, Data: recipes, Message: "Success collect data recipes!"}
 		jsonData, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -141,7 +141,63 @@ func InsertRecipe(w http.ResponseWriter, r *http.Request) {
 
 		config.DB.Create(&recipe)
 
+		if len(recipe.TagsId) > 0 {
+			for _, TagID := range recipe.TagsId {
+				recipeTag := new(entity.RecipeTag)
+				recipeTag.RecipeId = recipe.Id
+				recipeTag.TagId = TagID
+				config.DB.Create(&recipeTag)
+			}
+		}
+
 		result := Result{Code: 200, Data: recipe, Message: "Success insert data recipe!"}
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
+	}
+	http.Error(w, "Method not valid!", http.StatusInternalServerError)
+}
+
+func GetAllTag(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == "GET" {
+		var tags []entity.TagResponse
+
+		config.DB.Preload("Recipe").Find(&tags)
+
+		result := Result{Code: 200, Data: tags, Message: "Success collect data tags!"}
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
+	}
+	http.Error(w, "Method not valid!", http.StatusInternalServerError)
+}
+
+func InsertTag(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == "POST" {
+		var tag entity.Tag
+		err := json.NewDecoder(r.Body).Decode(&tag)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		config.DB.Create(&tag)
+
+		result := Result{Code: 200, Data: tag, Message: "Success insert data tag!"}
 		jsonData, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
