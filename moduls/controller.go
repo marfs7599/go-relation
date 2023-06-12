@@ -45,7 +45,32 @@ func InsertPatient(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		config.DB.Create(&patient)
+		// ======== Manual Validation =======
+		if patient.Nik == 0 {
+			http.Error(w, "ID Pasien is required", 400)
+			return
+		}
+
+		if patient.Name == "" {
+			http.Error(w, "Name is required", 400)
+			return
+		}
+
+		if patient.Address == "" {
+			http.Error(w, "Address is required", 400)
+			return
+		}
+
+		if patient.Phonenumber == "" {
+			http.Error(w, "Phonenumber is required", 400)
+			return
+		}
+		// ==== End Validation ====
+
+		if err := config.DB.Create(&patient).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		result := Result{Code: 200, Data: patient, Message: "Success insert data patient!"}
 		jsonData, err := json.Marshal(result)
@@ -92,7 +117,22 @@ func InsertBpjs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		config.DB.Create(&bpjs)
+		// ======== Manual Validation =======
+		if bpjs.NoCard == "" {
+			http.Error(w, "No Card is required", 400)
+			return
+		}
+
+		if bpjs.PatientId == 0 {
+			http.Error(w, "ID Pasien is required", 400)
+			return
+		}
+		// ==== End Validation ====
+
+		if err := config.DB.Create(&bpjs).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		result := Result{Code: 200, Data: bpjs, Message: "Success insert data bpjs!"}
 		jsonData, err := json.Marshal(result)
@@ -139,7 +179,32 @@ func InsertRecipe(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		config.DB.Create(&recipe)
+		// ======== Manual Validation =======
+		if recipe.Name == "" {
+			http.Error(w, "Name is required", 400)
+			return
+		}
+
+		if recipe.Dose == "" {
+			http.Error(w, "Dose is required", 400)
+			return
+		}
+
+		if recipe.PatientId == 0 {
+			http.Error(w, "ID Pasien is required", 400)
+			return
+		}
+
+		if len(recipe.TagsId) == 0 {
+			http.Error(w, "ID Pasien is required", 400)
+			return
+		}
+		// ==== End Validation ====
+
+		if err := config.DB.Create(&recipe).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		if len(recipe.TagsId) > 0 {
 			for _, TagID := range recipe.TagsId {
@@ -195,7 +260,17 @@ func InsertTag(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		config.DB.Create(&tag)
+		// ======== Manual Validation =======
+		if tag.Name == "" {
+			http.Error(w, "Name is required", 400)
+			return
+		}
+		// ==== End Validation ====
+
+		if err := config.DB.Create(&tag).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		result := Result{Code: 200, Data: tag, Message: "Success insert data tag!"}
 		jsonData, err := json.Marshal(result)
